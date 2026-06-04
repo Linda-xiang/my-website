@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档知识管理平台 | DocMind</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=11">
+    <!-- Quill Editor 样式（CSS 不阻塞渲染） -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    <!-- KaTeX 样式（CSS 不阻塞渲染） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+</head>
+<body>
+    <!-- 侧边栏 -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span>DocMind</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>工作台</span>
+            </a>
+            <a href="#" class="nav-item" data-page="notes">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                <span>笔记编辑</span>
+            </a>
+            <a href="#" class="nav-item" data-page="files">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                <span>文件管理</span>
+            </a>
+            <a href="#" class="nav-item" data-page="translate">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                <span>文档翻译</span>
+            </a>
+            <a href="#" class="nav-item" data-page="ocr">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                <span>图片文字提取</span>
+            </a>
+            <a href="#" class="nav-item" data-page="ai">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4v1h3a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h3V6a4 4 0 0 1 4-4z"></path><polyline points="9 13 11 15 15 11"></polyline></svg>
+                <span>AI 智能体</span>
+            </a>
+            <a href="#" class="nav-item" data-page="batch">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                <span>多文件分析</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer" id="sidebar-footer">
+            <!-- 用户区域 -->
+            <div class="sidebar-user" id="sidebar-user">
+                <div class="user-info" id="user-info" style="display:none">
+                    <span class="user-email" id="user-email"></span>
+                    <span class="user-logout" onclick="logout()">退出</span>
+                </div>
+                <div class="user-login-btn" id="user-login-btn" onclick="showLoginForm()">
+                    <span>👤 登录 / 注册</span>
+                </div>
+                <div class="user-auth-form" id="user-auth-form" style="display:none">
+                    <div class="auth-tabs">
+                        <span class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">登录</span>
+                        <span class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">注册</span>
+                    </div>
+                    <div class="auth-form-body" id="auth-form-body">
+                        <input type="text" id="auth-username" placeholder="用户名" class="auth-input">
+                        <input type="password" id="auth-password" placeholder="密码（至少6位）" class="auth-input">
+                        <button class="btn btn-primary btn-sm" id="auth-submit-btn" onclick="submitAuth()">登录</button>
+                    </div>
+                    <div class="auth-error" id="auth-error"></div>
+                </div>
+            </div>
+            <div class="config-btn" onclick="openSettings()">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                <span>设置</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- 主内容区 -->
+    <main class="main-content" id="main-content">
+        <!-- 仪表盘 -->
+        <div class="page active" id="page-dashboard">
+            <header class="page-header">
+                <h1>工作台</h1>
+                <div class="header-actions">
+                    <div class="search-box">
+                        <input type="text" id="global-search" placeholder="全文搜索笔记、文件、翻译记录...">
+                        <button onclick="globalSearch()">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card" onclick="navigateTo('notes')">
+                    <div class="stat-icon notes-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+                    </div>
+                    <div class="stat-info"><span class="stat-num" id="stat-notes">0</span><span class="stat-label">笔记</span></div>
+                </div>
+                <div class="stat-card" onclick="navigateTo('files')">
+                    <div class="stat-icon files-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                    </div>
+                    <div class="stat-info"><span class="stat-num" id="stat-files">0</span><span class="stat-label">文件</span></div>
+                </div>
+                <div class="stat-card" onclick="navigateTo('translate')">
+                    <div class="stat-icon trans-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line></svg>
+                    </div>
+                    <div class="stat-info"><span class="stat-num" id="stat-translations">0</span><span class="stat-label">翻译记录</span></div>
+                </div>
+                <div class="stat-card" onclick="navigateTo('ai')">
+                    <div class="stat-icon ai-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    </div>
+                    <div class="stat-info"><span class="stat-num" id="stat-chats">0</span><span class="stat-label">AI对话</span></div>
+                </div>
+            </div>
+            <div class="dashboard-grid">
+                <div class="dash-panel" id="recent-notes-panel">
+                    <h3>最近的笔记</h3>
+                    <div class="recent-list" id="recent-notes-list"></div>
+                </div>
+                <div class="dash-panel" id="recent-files-panel">
+                    <h3>最近的文件</h3>
+                    <div class="recent-list" id="recent-files-list"></div>
+                </div>
+                <div class="dash-panel" id="recent-translations-panel">
+                    <h3>最近翻译</h3>
+                    <div class="recent-list" id="recent-translations-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 笔记编辑器 -->
+        <div class="page" id="page-notes">
+            <header class="page-header">
+                <h1>笔记编辑</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="createNote()">新建笔记</button>
+                    <button class="btn btn-outline" onclick="showTemplates()">模板库</button>
+                </div>
+            </header>
+            <div class="notes-layout">
+                <div class="notes-sidebar" id="notes-sidebar">
+                    <div class="notes-search">
+                        <input type="text" id="notes-search" placeholder="搜索笔记..." oninput="loadNotes()">
+                    </div>
+                    <div class="folder-tree" id="notes-folder-tree">
+                        <div class="folder-item active" data-folder="notes_default" onclick="selectNotesFolder('notes_default', this)">📁 全部笔记</div>
+                    </div>
+                    <div class="notes-list" id="notes-list"></div>
+                </div>
+                <div class="notes-editor" id="notes-editor-container">
+                    <div class="editor-toolbar">
+                        <input type="text" id="note-title" class="note-title-input" placeholder="笔记标题...">
+                        <div class="editor-actions">
+                            <span class="tag-input-wrapper">
+                                <input type="text" id="note-tags" placeholder="添加标签 (回车确认)" onkeydown="addTag(event)">
+                                <div class="tags-display" id="tags-display"></div>
+                            </span>
+                            <button class="btn btn-sm" onclick="saveCurrentNote()">💾 保存</button>
+                            <button class="btn btn-sm btn-outline" onclick="showNoteHistory()">📋 历史版本</button>
+                        </div>
+                    </div>
+                    <div id="quill-editor" class="quill-editor"></div>
+                    <div id="note-preview" class="note-preview" style="display:none;"></div>
+                    <div class="note-mode-toggle" id="note-mode-toggle" style="display:none;">
+                        <button class="btn btn-sm btn-outline" onclick="toggleNoteMode()">📝 切换到编辑模式</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 文件管理 -->
+        <div class="page" id="page-files">
+            <header class="page-header">
+                <h1>文件管理</h1>
+                <div class="header-actions">
+                    <label class="btn btn-primary upload-btn">
+                        📤 上传文件
+                        <input type="file" id="file-upload-input" multiple style="display:none" onchange="uploadFiles()">
+                    </label>
+                    <button class="btn btn-outline" onclick="batchProcess('extract_text')">批量提取文本</button>
+                    <button class="btn btn-outline" onclick="batchProcess('summarize')">批量AI总结</button>
+                </div>
+            </header>
+            <div class="files-layout">
+                <div class="files-sidebar">
+                    <div class="files-filter">
+                        <input type="text" id="files-search" placeholder="搜索文件..." oninput="loadFiles()">
+                        <select id="files-type-filter" onchange="loadFiles()">
+                            <option value="">全部类型</option>
+                            <option value="pdf">PDF</option>
+                            <option value="word">Word</option>
+                            <option value="text">文本</option>
+                            <option value="image">图片</option>
+                            <option value="audio">音频</option>
+                            <option value="video">视频</option>
+                            <option value="ebook">电子书</option>
+                            <option value="spreadsheet">表格</option>
+                        </select>
+                    </div>
+                    <div class="folder-tree" id="files-folder-tree">
+                        <div class="folder-item active" data-folder="files_default" onclick="selectFilesFolder('files_default', this)">📁 全部文件</div>
+                    </div>
+                </div>
+                <div class="files-grid" id="files-grid">
+                    <p class="empty-state">请上传文件或选择文件夹查看内容</p>
+                </div>
+            </div>
+            <!-- 文件预览弹窗 -->
+            <div class="modal" id="file-preview-modal">
+                <div class="modal-overlay" onclick="closeFilePreview()"></div>
+                <div class="modal-content large">
+                    <div class="modal-header">
+                        <h3 id="preview-file-name">文件预览</h3>
+                        <button class="modal-close" onclick="closeFilePreview()">✕</button>
+                    </div>
+                    <div class="modal-body" id="preview-file-body"></div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" onclick="extractTextFromFile()">🔍 提取/识别文字</button>
+                        <button class="btn btn-outline" onclick="aiSummarizeFile()">🤖 AI总结</button>
+                        <button class="btn btn-outline" onclick="downloadCurrentFile()">⬇ 下载</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 文档翻译 -->
+        <div class="page" id="page-translate">
+            <header class="page-header">
+                <h1>文档翻译</h1>
+                <div class="header-actions">
+                    <select id="trans-source-lang" class="lang-select">
+                        <option value="auto">自动检测</option>
+                        <option value="zh">中文</option>
+                        <option value="en">英文</option>
+                        <option value="ja">日文</option>
+                        <option value="ko">韩文</option>
+                        <option value="fr">法文</option>
+                        <option value="de">德文</option>
+                        <option value="es">西班牙文</option>
+                        <option value="ru">俄文</option>
+                        <option value="ar">阿拉伯文</option>
+                    </select>
+                    <button class="btn btn-icon" onclick="swapLang()" title="切换语言">⇄</button>
+                    <select id="trans-target-lang" class="lang-select">
+                        <option value="zh">中文</option>
+                        <option value="en" selected>英文</option>
+                        <option value="ja">日文</option>
+                        <option value="ko">韩文</option>
+                        <option value="fr">法文</option>
+                        <option value="de">德文</option>
+                        <option value="es">西班牙文</option>
+                        <option value="ru">俄文</option>
+                        <option value="ar">阿拉伯文</option>
+                    </select>
+                    <select id="trans-context" class="lang-select">
+                        <option value="general">通用</option>
+                        <option value="academic">学术</option>
+                        <option value="business">商务</option>
+                        <option value="casual">口语</option>
+                    </select>
+                </div>
+            </header>
+            <div class="translate-layout">
+                <!-- 文本翻译 -->
+                <div class="trans-panel">
+                    <div class="trans-tabs">
+                        <button class="trans-tab active" onclick="switchTransTab('text', this)">文本翻译</button>
+                        <button class="trans-tab" onclick="switchTransTab('history', this)">翻译记录</button>
+                    </div>
+                    <!-- 文本翻译 -->
+                    <div class="trans-tab-content active" id="trans-tab-text">
+                        <div class="dual-panel">
+                            <div class="trans-box">
+                                <div class="trans-box-header">原文</div>
+                                <textarea id="trans-input" class="trans-textarea" placeholder="输入要翻译的文字...&#10;支持中英日韩法德西俄等多语种互译" oninput="autoTranslate()"></textarea>
+                                <div class="trans-box-footer">
+                                    <span id="trans-char-count">0 字符</span>
+                                    <button class="btn btn-sm btn-primary" onclick="translateText()">翻译</button>
+                                </div>
+                            </div>
+                            <div class="trans-box">
+                                <div class="trans-box-header">
+                                    译文
+                                    <span class="header-actions-inner">
+                                        <button class="btn btn-xs" onclick="copyTranslation()">复制</button>
+                                        <button class="btn btn-xs" onclick="addTranslationToNote()">存入笔记</button>
+                                    </span>
+                                </div>
+                                <div class="trans-output" id="trans-output">
+                                    <p class="empty-state">翻译结果将显示在这里</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 翻译历史 -->
+                    <div class="trans-tab-content" id="trans-tab-history">
+                        <div class="trans-history-actions">
+                            <button class="btn btn-outline btn-sm" onclick="exportTranslations('txt')">导出 TXT</button>
+                            <button class="btn btn-outline btn-sm" onclick="exportTranslations('json')">导出 JSON</button>
+                            <button class="btn btn-outline btn-sm" onclick="clearTranslations()">清空记录</button>
+                        </div>
+                        <div class="trans-history-list" id="trans-history-list">
+                            <p class="empty-state">暂无翻译记录</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- OCR 识别 -->
+        <div class="page" id="page-ocr">
+            <header class="page-header">
+                <h1>OCR 图片文字提取</h1>
+                <div class="header-actions">
+                    <label class="btn btn-primary upload-btn">
+                        📤 上传图片
+                        <input type="file" id="ocr-upload-input" multiple accept="image/*" style="display:none" onchange="uploadOCRImages()">
+                    </label>
+                    <button class="btn btn-outline" onclick="batchOCR()">批量识别</button>
+                </div>
+            </header>
+            <div class="ocr-layout">
+                <div class="ocr-upload-area" id="ocr-drop-zone">
+                    <div class="drop-zone-content">
+                        <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                        <h3>拖拽图片到此处 / 点击上传 / Ctrl+V 粘贴</h3>
+                        <p>支持 JPG、PNG、WebP、BMP 等图片格式，也支持扫描版PDF。复制图片后直接 Ctrl+V 粘贴识别</p>
+                    </div>
+                </div>
+                <div class="ocr-results" id="ocr-results">
+                    <h3>识别结果</h3>
+                    <div class="ocr-result-list" id="ocr-result-list">
+                        <p class="empty-state">上传图片开始识别</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI 智能体 -->
+        <div class="page" id="page-ai">
+            <header class="page-header">
+                <h1>AI 智能体</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="createNewChat()">新对话</button>
+                    <select id="ai-mode" class="lang-select">
+                        <option value="chat">💬 通用问答</option>
+                        <option value="summarize">📋 文档总结</option>
+                        <option value="translate">🌐 专业翻译</option>
+                        <option value="quiz">📝 生成题目</option>
+                        <option value="analyze">🔍 深度分析</option>
+                    </select>
+                </div>
+            </header>
+            <div class="ai-layout">
+                <div class="ai-sidebar">
+                    <div class="ai-chats-header">
+                        <h4>对话历史</h4>
+                    </div>
+                    <div class="ai-chats-list" id="ai-chats-list">
+                        <p class="empty-state">暂无对话记录</p>
+                    </div>
+                </div>
+                <div class="ai-chat-area" id="ai-chat-area">
+                    <div class="ai-messages" id="ai-messages">
+                        <div class="ai-welcome">
+                            <h2>🤖 DocMind AI 智能体</h2>
+                            <p>选择一种模式开始交互：</p>
+                            <div class="quick-actions">
+                                <button class="quick-action-btn" onclick="setAiMode('summarize')">📋 文档总结分析</button>
+                                <button class="quick-action-btn" onclick="setAiMode('translate')">🌐 专业翻译</button>
+                                <button class="quick-action-btn" onclick="setAiMode('quiz')">📝 生成练习题</button>
+                                <button class="quick-action-btn" onclick="setAiMode('analyze')">🔍 深度内容分析</button>
+                            </div>
+                            <p class="hint-text">可处理长文档、PDF内容、翻译、纠错、出题等多种任务</p>
+                        </div>
+                    </div>
+                    <div class="ai-input-area">
+                        <textarea id="ai-input" class="ai-textarea" placeholder="输入你的问题或粘贴文档内容..." rows="3" onkeydown="if(event.ctrlKey&&event.key==='Enter')sendAiMessage()"></textarea>
+                        <div class="ai-input-actions">
+                            <label class="btn btn-sm btn-outline">
+                                📎 附加文件
+                                <input type="file" id="ai-file-input" style="display:none" onchange="attachFileToAI()">
+                            </label>
+                            <span class="hint-text">Ctrl+Enter 发送</span>
+                            <button class="btn btn-primary" id="ai-send-btn" onclick="sendAiMessage()">
+                                <span id="ai-send-text">发送</span>
+                                <span id="ai-send-loading" style="display:none;">思考中...</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 多文件分析 -->
+        <div class="page" id="page-batch">
+            <header class="page-header">
+                <h1>多文件对比分析</h1>
+            </header>
+            <div class="batch-layout">
+                <div class="batch-panel">
+                    <!-- 上传区域 -->
+                    <h3>📤 上传文件（支持批量）</h3>
+                    <label class="batch-upload-area" id="batch-drop-zone">
+                        <input type="file" id="batch-upload-input" multiple style="display:none" onchange="handleBatchUpload(this.files)">
+                        <div class="drop-zone-content">
+                            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                            <p>点击或拖拽多个文件到此处上传</p>
+                            <p class="hint-text">支持 PDF、Word、TXT 等文档格式，可同时上传多个文件进行对比分析</p>
+                        </div>
+                    </label>
+
+                    <!-- 已选文件列表 -->
+                    <div class="batch-file-list-area">
+                        <h4>已添加的文件 (<span id="batch-file-count">0</span>)</h4>
+                        <div class="batch-file-list" id="batch-file-list">
+                            <p class="empty-state">请上传文件或从下方选择已有文件</p>
+                        </div>
+                    </div>
+
+                    <!-- 从文件管理选择 -->
+                    <div style="margin-top:16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                        <button class="btn btn-outline btn-sm" onclick="addFilesFromFileManager()">+ 从文件管理中选择</button>
+                        <button class="btn btn-sm btn-danger" onclick="clearBatchFiles()">清空列表</button>
+                    </div>
+
+                    <!-- 分析操作 -->
+                    <h3 style="margin-top:20px;">🔍 分析操作</h3>
+                    <div class="batch-tabs" id="batch-tabs">
+                        <button class="batch-tab active" data-action="compare" onclick="switchBatchTab('compare', this)">📊 对比分析</button>
+                        <button class="batch-tab" data-action="summarize" onclick="switchBatchTab('summarize', this)">📋 批量总结</button>
+                        <button class="batch-tab" data-action="extract" onclick="switchBatchTab('extract', this)">📝 批量提取文字</button>
+                    </div>
+                    <div class="batch-actions" id="batch-actions-bar">
+                        <button class="btn btn-primary" id="batch-execute-btn" onclick="executeBatchAnalysis()">
+                            🚀 开始对比分析
+                        </button>
+                    </div>
+                    
+                    <!-- 结果区域 -->
+                    <div class="batch-results" id="batch-results"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 设置弹窗 -->
+    <div class="modal" id="settings-modal">
+        <div class="modal-overlay" onclick="closeSettings()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>系统设置</h3>
+                <button class="modal-close" onclick="closeSettings()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>DeepSeek API Key</label>
+                    <input type="password" id="setting-api-key" class="form-input" placeholder="sk-...">
+                    <span class="hint-text" id="api-key-status"></span>
+                </div>
+                <div class="form-group">
+                    <label>API Base URL</label>
+                    <input type="text" id="setting-base-url" class="form-input" value="https://api.deepseek.com">
+                </div>
+                <div class="form-group">
+                    <label>默认源语言</label>
+                    <select id="setting-source-lang" class="form-input">
+                        <option value="zh">中文</option>
+                        <option value="en">英文</option>
+                        <option value="auto">自动检测</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>默认目标语言</label>
+                    <select id="setting-target-lang" class="form-input">
+                        <option value="en">英文</option>
+                        <option value="zh">中文</option>
+                        <option value="ja">日文</option>
+                        <option value="ko">韩文</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeSettings()">取消</button>
+                <button class="btn btn-primary" onclick="saveSettings()">保存设置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模板弹窗 -->
+    <div class="modal" id="template-modal">
+        <div class="modal-overlay" onclick="closeTemplates()"></div>
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>笔记模板库</h3>
+                <button class="modal-close" onclick="closeTemplates()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="template-grid" id="template-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 历史版本弹窗 -->
+    <div class="modal" id="history-modal">
+        <div class="modal-overlay" onclick="closeHistory()"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>历史版本</h3>
+                <button class="modal-close" onclick="closeHistory()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-list" id="history-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- 划词翻译浮层 -->
+    <div class="popup-trans" id="popup-trans">
+        <div class="popup-header">
+            <span>划词翻译</span>
+            <button onclick="closePopupTrans()">✕</button>
+        </div>
+        <div class="popup-body" id="popup-trans-body"></div>
+    </div>
+
+    <!-- CDN 库：async 异步加载，不阻塞页面渲染 -->
+    <script async src="https://cdn.quilljs.com/1.3.7/quill.min.js" onerror="console.warn('Quill CDN failed')"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" onerror="console.warn('KaTeX CDN failed')"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js" onerror="console.warn('marked CDN failed')"></script>
+    <script>
+    // 等待 KaTeX + marked 都加载完成后注册数学公式扩展（带重试）
+    (function registerMath(){
+        if (typeof marked !== 'undefined' && typeof katex !== 'undefined') {
+            marked.setOptions({ breaks: true, gfm: true });
+            const mathExtension = {
+                name: 'math',
+                extensions: [
+                    {
+                        name: 'inlineMath',
+                        level: 'inline',
+                        start(src) { return src.indexOf('$'); },
+                        tokenizer(src) {
+                            const match = src.match(/^\$([^$\n]+?)\$/);
+                            if (match) {
+                                return { type: 'inlineMath', raw: match[0], text: match[1].trim() };
+                            }
+                        },
+                        renderer(token) {
+                            try {
+                                return katex.renderToString(token.text, { throwOnError: false, strict: false });
+                            } catch(e) {
+                                return '<code>$' + token.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '$</code>';
+                            }
+                        }
+                    },
+                    {
+                        name: 'blockMath',
+                        level: 'block',
+                        start(src) { return src.indexOf('$$'); },
+                        tokenizer(src) {
+                            const match = src.match(/^\$\$\n?([\s\S]+?)\n?\$\$/);
+                            if (match) {
+                                return { type: 'blockMath', raw: match[0], text: match[1].trim() };
+                            }
+                        },
+                        renderer(token) {
+                            try {
+                                return '<div class="math-block">' + katex.renderToString(token.text, { displayMode: true, throwOnError: false, strict: false }) + '</div>';
+                            } catch(e) {
+                                return '<pre><code>$$' + token.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') + '$$</code></pre>';
+                            }
+                        }
+                    }
+                ]
+            };
+            marked.use(mathExtension);
+        } else if (document.readyState !== 'complete') {
+            // CDN 尚未加载完成，200ms 后重试（最多 15 秒）
+            if (!registerMath._retries) registerMath._retries = 0;
+            if (registerMath._retries++ < 75) setTimeout(registerMath, 200);
+        }
+    })();
+    </script>
+    <script src="/static/js/app.js?v=6"></script>
+</body>
+</html>
